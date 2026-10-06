@@ -1,0 +1,39 @@
+{#- /shop/orders/<id> — OrderDetail.vue. The order is a personalised region (the buyer's bearer). -#}
+{% extends "shop/_orders_document.html.j2" %}
+{% block shop_content %}
+<div class="order-detail" data-testid="order-detail">
+  {% region %}
+  {%- if order_state == 'loading' %}
+  <div class="order-detail__loading" data-testid="order-detail-loading">{{ _('shop.order.loading') }}</div>
+  {%- elif order_state == 'error' %}
+  <div class="order-detail__error" data-testid="order-detail-error">{{ error }}</div>
+  {%- elif order_state == 'not_found' %}
+  <div class="order-detail__empty" data-testid="order-detail-empty">{{ _('shop.order.notFound') }}</div>
+  {%- else %}
+  <div class="order-detail__header">
+    <h1 class="order-detail__heading" data-testid="order-detail-number">{{ _('shop.order.heading') }} {{ order.number }}</h1>
+    <span class="order-detail__status order-detail__status--{{ order.status }}" data-testid="order-detail-status">{{ order.status }}</span>
+  </div>
+  {%- if order.tracking %}
+  <div class="order-detail__tracking" data-testid="order-detail-tracking">
+    <h2 class="order-detail__section-title">{{ _('shop.order.tracking') }}</h2>
+    <p class="order-detail__tracking-carrier">{{ _('shop.order.carrier') }} <strong>{{ order.tracking.carrier }}</strong></p>
+    <p class="order-detail__tracking-number">{{ _('shop.order.trackingNumber') }} <strong>{{ order.tracking.number }}</strong></p>
+  </div>
+  {%- endif %}
+  <div class="order-detail__items">
+    <h2 class="order-detail__section-title">{{ _('shop.order.items') }}</h2>
+    <ul class="order-detail__item-list" data-testid="order-detail-items">
+      {%- for item in order['items'] %}
+      <li class="order-item" data-testid="order-detail-item"><span class="order-item__name" data-testid="order-detail-item-name">{{ item.name }}</span><span class="order-item__quantity">x{{ item.quantity }}</span><span class="order-item__price" data-testid="order-detail-item-price">{{ item.price }}</span></li>
+      {%- endfor %}
+    </ul>
+  </div>
+  <div class="order-detail__summary">
+    <span class="order-detail__total" data-testid="order-detail-total">{{ _('shop.order.total') }} {{ order.total }}</span>
+    <span class="order-detail__date" data-testid="order-detail-date">{{ _('shop.order.placedOn') }} {{ order.placed_on }}</span>
+  </div>
+  {%- endif %}
+  {% endregion %}
+</div>
+{% endblock %}

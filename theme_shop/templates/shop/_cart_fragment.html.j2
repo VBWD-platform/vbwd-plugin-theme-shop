@@ -1,0 +1,37 @@
+{#- POST /_render/_fragment/shop/cart — Cart.vue's body for the posted vbwd_shop_cart. -#}
+{%- from "checkout/_price_display.html.j2" import price_display -%}
+{%- if state == 'empty' -%}
+<div class="shopping-cart__empty" data-testid="shopping-cart-empty">
+  <p>{{ _('shop.cart.empty') }}</p>
+  <a href="/shop" class="shopping-cart__browse-link" data-testid="shopping-cart-browse">{{ _('shop.cart.browse') }}</a>
+</div>
+{%- else -%}
+<ul class="shopping-cart__items" data-testid="shopping-cart-items">
+  {%- for line in lines %}
+  <li class="cart-item" data-testid="cart-item">
+    <img src="{{ line.image_url }}" alt="{{ line.name }}" class="cart-item__image">
+    <div class="cart-item__info">
+      <span class="cart-item__name" data-testid="cart-item-name">{{ line.name }}</span>
+      {%- if line.variant_name %}
+      <span class="cart-item__variant">{{ line.variant_name }}</span>
+      {%- endif %}
+      <span class="cart-item__price">{{ price_display(line.unit_price) }}</span>
+    </div>
+    <div class="cart-item__quantity" data-testid="cart-item-quantity">
+      <button class="cart-item__qty-btn" data-testid="cart-item-decrease"{% if not line.can_decrease %} disabled{% endif %} data-vbwd-shop-quantity="{{ line.decrease_to }}" data-product-id="{{ line.product_id }}" data-variant-id="{{ line.variant_id }}">&minus;</button>
+      <span class="cart-item__qty-value">{{ line.quantity }}</span>
+      <button class="cart-item__qty-btn" data-testid="cart-item-increase"{% if not line.can_increase %} disabled{% endif %} data-vbwd-shop-quantity="{{ line.increase_to }}" data-product-id="{{ line.product_id }}" data-variant-id="{{ line.variant_id }}">+</button>
+    </div>
+    <span class="cart-item__subtotal" data-testid="cart-item-subtotal">{{ price_display(line.subtotal) }}</span>
+    <button class="cart-item__remove" data-testid="cart-item-remove" data-vbwd-shop-remove data-product-id="{{ line.product_id }}" data-variant-id="{{ line.variant_id }}">{{ _('shop.cart.remove') }}</button>
+  </li>
+  {%- endfor %}
+</ul>
+<div class="shopping-cart__footer" data-testid="shopping-cart-footer">
+  <span class="shopping-cart__subtotal" data-testid="shopping-cart-subtotal">{{ _('shop.cart.subtotal', count=item_count) }} {{ price_display(subtotal) }}</span>
+  <form method="get" action="/checkout">
+    <input type="hidden" name="source" value="shop">
+    <button type="submit" class="shopping-cart__checkout-btn" data-testid="shopping-cart-checkout">{{ _('shop.cart.checkout') }}</button>
+  </form>
+</div>
+{%- endif -%}

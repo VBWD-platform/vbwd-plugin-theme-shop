@@ -1,0 +1,7 @@
+{#- ShopCheckoutSummary.vue — the shop source's order summary (one row per cart line). -#}
+{%- from "checkout/_price_display.html.j2" import price_display -%}
+<div class="cart-items-summary">
+  {%- for row in summary.rows %}
+  <div class="plan-row" data-testid="cart-line-item-{{ row.product_id }}"><span>{{ row.name }}{% if row.quantity > 1 %} <span class="plan-description">x{{ row.quantity }}</span>{% endif %}</span><span>{{ price_display(row.price) }}</span></div>
+  {%- endfor %}
+</div>

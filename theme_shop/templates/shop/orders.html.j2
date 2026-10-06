@@ -1,0 +1,23 @@
+{#- /shop/orders — OrderHistory.vue. The orders are a personalised region (the buyer's bearer). -#}
+{% extends "shop/_orders_document.html.j2" %}
+{% block title %}{{ _('shop.orders.heading') }}{% endblock %}
+{% block shop_content %}
+<div class="order-history" data-testid="order-history">
+  <h1 class="order-history__heading">{{ _('shop.orders.heading') }}</h1>
+  {% region %}
+  {%- if orders_state == 'loading' %}
+  <div class="order-history__loading" data-testid="order-history-loading">{{ _('shop.orders.loading') }}</div>
+  {%- elif orders_state == 'error' %}
+  <div class="order-history__error" data-testid="order-history-error">{{ error or _('shop.orders.loadFailed') }}</div>
+  {%- elif orders_state == 'empty' %}
+  <div class="order-history__empty" data-testid="order-history-empty">{{ _('shop.orders.empty') }}</div>
+  {%- else %}
+  <ul class="order-history__list" data-testid="order-history-list">
+    {%- for order in orders %}
+    <li class="order-row" data-testid="order-row"><a href="{{ order.href }}" class="order-row__link"><span class="order-row__number" data-testid="order-row-number">{{ order.number }}</span><span class="order-row__status order-row__status--{{ order.status }}" data-testid="order-row-status">{{ order.status }}</span><span class="order-row__total" data-testid="order-row-total">{{ order.total }}</span><span class="order-row__date" data-testid="order-row-date">{{ order.date }}</span></a></li>
+    {%- endfor %}
+  </ul>
+  {%- endif %}
+  {% endregion %}
+</div>
+{% endblock %}

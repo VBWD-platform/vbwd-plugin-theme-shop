@@ -1,0 +1,5 @@
+{#- The auth-only shell of the order pages (requiresAuth): data-auth="pending" keeps the
+    content hidden until the runtime confirms the session; no session → /login?redirect=. -#}
+{% extends "_shared/document.html.j2" %}
+{% block body_attributes %} data-auth="pending" data-vbwd-auth-required{% endblock %}
+{% block content %}<div class="vbwd-private-chrome">{% block shop_content %}{% endblock %}</div>{% endblock %}

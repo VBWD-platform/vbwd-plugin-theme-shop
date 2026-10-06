@@ -1,0 +1,45 @@
+{#- The ProductDetail CMS widget — ProductDetail.vue. "Add to Cart" carries the exact
+    vbwd_shop_cart item; the shop runtime adds it in the browser. -#}
+{%- from "checkout/_price_display.html.j2" import price_display -%}
+{%- from "cms/macros/tags_custom_fields.html.j2" import tag_chips, custom_fields_display -%}
+{%- set detail = component_context -%}
+<div class="product-detail" data-testid="product-detail">
+  {%- if detail.state == 'error' %}
+  <div class="product-detail__error" data-testid="product-detail-error">{{ detail.error or _('shop.detail.notFound') }}</div>
+  {%- else %}
+  {%- set product = detail.product %}
+  <div class="product-detail__gallery">
+    <img src="{{ product.image_url or '' }}" alt="{{ product.name }}" class="product-detail__image" data-testid="product-detail-image">
+    {%- if product.images|length > 1 %}
+    <div class="product-detail__thumbnails" data-testid="product-detail-thumbnails">
+      {%- for image in product.images %}<button type="button" class="product-detail__thumb" data-vbwd-shop-thumb="{{ image.url }}"><img src="{{ image.url }}" alt="{{ image.alt or product.name }}"></button>{% endfor %}
+    </div>
+    {%- endif %}
+  </div>
+  <div class="product-detail__info">
+    <h1 class="product-detail__name" data-testid="product-detail-name">{{ product.name }}</h1>
+    <p class="product-detail__price" data-testid="product-detail-price">{{ price_display(product.price) }}</p>
+    <p class="product-detail__description" data-testid="product-detail-description">{{ product.description }}</p>
+    {%- if detail.tags_custom_fields %}
+    {{ tag_chips(detail.tags_custom_fields.tags, 'product-detail__tags') }}{{ custom_fields_display(detail.tags_custom_fields.custom_fields, 'product-detail__custom-fields') }}
+    {%- endif %}
+    {%- if detail.specifications %}
+    <section class="product-detail__specs-section" data-testid="product-detail-specs-section">
+      <h2 class="vbwd-subheading product-detail__specs-heading" data-testid="product-detail-specs-heading">{{ _('shop.specifications') }}</h2>
+      <dl class="product-detail__specs" data-testid="product-detail-specs">
+        {%- for row in detail.specifications %}
+        <dt class="product-detail__spec-label">{{ row.label }}</dt>
+        <dd class="product-detail__spec-value" data-testid="product-detail-spec-{{ row.slug }}">{% if row.is_url %}<a href="{{ row.display }}" target="_blank" rel="noopener">{{ row.display }}</a>{% else %}<span>{{ _(row.boolean_key) if row.boolean_key else row.display }}</span>{% endif %}</dd>
+        {%- endfor %}
+      </dl>
+    </section>
+    {%- endif %}
+    <span class="product-detail__stock{% if not detail.in_stock %} product-detail__stock--out{% endif %}" data-testid="product-detail-stock">{{ _('shop.detail.inStock') if detail.in_stock else _('shop.detail.outOfStock') }}</span>
+    <div class="product-detail__cart-row">
+      <button class="product-detail__add-to-cart"{% if not detail.in_stock %} disabled{% endif %} data-testid="product-detail-add-to-cart" data-vbwd-shop-add='{{ detail.cart_item|tojson }}' data-added-label="{{ _('shop.detail.added') }}">{{ _('shop.detail.addToCart') }}</button>
+      <a href="/shop/cart" class="product-detail__view-cart" data-testid="product-detail-view-cart" data-vbwd-shop-view-cart data-label="{{ _('shop.detail.viewCart') }}" hidden></a>
+    </div>
+  </div>
+  {%- endif %}
+</div>
+<script>{% include "shop/partials/shop_runtime.js" %}</script>

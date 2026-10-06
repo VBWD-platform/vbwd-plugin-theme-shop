@@ -1,0 +1,9 @@
+{#- The ShoppingCart CMS widget — Cart.vue. An island: the runtime posts vbwd_shop_cart on
+    load and after every cart change; the fragment renders the lines. -#}
+<div class="shopping-cart" data-testid="shopping-cart">
+  <h1 class="shopping-cart__heading">{{ _('shop.cart.heading') }}</h1>
+  <div class="shopping-cart__island" data-vbwd-cart="vbwd_shop_cart" hx-post="/_render/_fragment/shop/cart" hx-trigger="load, vbwd:cart-changed from:document" hx-swap="innerHTML">
+    <div class="shopping-cart__loading" data-testid="shopping-cart-loading">{{ _('shop.cart.loading') }}</div>
+  </div>
+</div>
+<script>{% include "shop/partials/shop_runtime.js" %}</script>

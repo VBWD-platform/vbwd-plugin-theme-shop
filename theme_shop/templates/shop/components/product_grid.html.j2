@@ -1,0 +1,55 @@
+{#- The ProductGrid CMS widget — ProductCatalog.vue + fe-core CatalogueFilterBar. One GET form
+    (works without JS); htmx swaps the whole catalogue from the products fragment. -#}
+{%- from "checkout/_price_display.html.j2" import price_display -%}
+{%- from "cms/macros/catalogue_filter_bar.html.j2" import catalogue_filter_bar -%}
+{%- set catalog = component_context -%}
+{%- set filters = catalog.filters -%}
+<div class="product-catalog" data-testid="product-catalog">
+  <h1 class="product-catalog__heading">{{ _('shop.catalog.heading') }}</h1>
+  <form id="product-catalog-form" method="get" action="{{ catalog.form_action }}" hx-get="/_render/_fragment/shop/products" hx-trigger="submit, change" hx-target="closest .product-catalog" hx-swap="outerHTML">
+    <input type="hidden" name="catalog_path" value="{{ catalog.form_action }}">
+    <input type="hidden" name="tags" value="{{ filters.tags|join(',') }}">
+    <div class="product-catalog__toolbar">
+      <input id="product-catalog-search" type="text" name="q" value="{{ filters.q }}" placeholder="{{ _('shop.catalog.searchPlaceholder') }}" class="product-catalog__search" data-testid="product-catalog-search" hx-get="/_render/_fragment/shop/products" hx-trigger="input changed delay:300ms" hx-include="closest form" hx-target="closest .product-catalog" hx-swap="outerHTML">
+      <select name="sort" class="product-catalog__sort" data-testid="product-catalog-sort">
+        {%- for sort_value, label_key in catalog.sort_options %}
+        <option value="{{ sort_value }}"{% if sort_value == filters.sort %} selected{% endif %}>{{ _(label_key) }}</option>
+        {%- endfor %}
+      </select>
+    </div>
+    {{ catalogue_filter_bar(catalog.facets, filters, _('shop.filters.all')) }}
+  </form>
+  {%- if catalog.state == 'error' %}
+  <div class="product-catalog__error" data-testid="product-catalog-error">{{ catalog.error or _('shop.catalog.loadFailed') }}</div>
+  {%- elif catalog.state == 'empty' %}
+  <div class="product-catalog__empty" data-testid="product-catalog-empty">{{ _('shop.catalog.empty') }}</div>
+  {%- else %}
+  <div class="product-catalog__grid" data-testid="product-catalog-grid">
+    {%- for product in catalog.products %}
+    <a href="{{ product.href }}" class="product-card" data-testid="product-card-{{ product.slug }}">
+      {%- if product.image_url %}
+      <img src="{{ product.image_url }}" alt="{{ product.name }}" class="product-card__image">
+      {%- else %}
+      <div class="product-card__image product-card__image--placeholder"></div>
+      {%- endif %}
+      <div class="product-card__body">
+        <h3 class="product-card__name" data-testid="product-card-name">{{ product.name }}</h3>
+        <p class="product-card__price" data-testid="product-card-price">{{ price_display(product.price) }}</p>
+        {%- if product.tags %}
+        <div class="product-card__tags">
+          {%- for tag in product.tags %}<button type="submit" form="product-catalog-form" name="toggle_tag" value="{{ tag.slug }}" class="product-card__tag{% if tag.active %} product-card__tag--active{% endif %}" data-testid="product-card-tag-{{ product.slug }}-{{ tag.slug }}">{{ tag.label }}</button>{% endfor %}
+        </div>
+        {%- endif %}
+      </div>
+    </a>
+    {%- endfor %}
+  </div>
+  {%- endif %}
+  {%- if catalog.pager %}
+  <div class="product-catalog__pager" data-testid="product-catalog-pager">
+    <button type="submit" form="product-catalog-form" name="page" value="{{ catalog.pager.previous or 1 }}" data-testid="product-catalog-prev"{% if not catalog.pager.previous %} disabled{% endif %}>←</button>
+    <span>{{ catalog.pager.current }} / {{ catalog.pager.total }}</span>
+    <button type="submit" form="product-catalog-form" name="page" value="{{ catalog.pager.next or catalog.pager.total }}" data-testid="product-catalog-next"{% if not catalog.pager.next %} disabled{% endif %}>→</button>
+  </div>
+  {%- endif %}
+</div>
